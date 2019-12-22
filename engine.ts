@@ -21,3 +21,13 @@ class Rectangle {
     return horizontal && vertical
   }
 }
+
+class Sprite {
+  image: string
+  rectangle: number
+
+  constructor(image, rectangle) {
+    this.image = image
+    this.rectangle = rectangle
+  }
+}
