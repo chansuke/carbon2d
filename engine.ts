@@ -33,9 +33,12 @@ class Sprite {
 }
 
 class AssetLoader {
+  _promises: any[]
+  _assets: Map<string, HTMLImageElement>
+
   constructor() {
     this._promises = []
-    this._assets = new Map()
+    this._assets = new Map<string, HTMLImageElement>()
   }
 
   addImage(name, url) {
