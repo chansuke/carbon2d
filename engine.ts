@@ -33,7 +33,7 @@ class Sprite {
 }
 
 class AssetLoader {
-  _promises: any[]
+  _promises: Array<Promise<unknown>>
   _assets: Map<string, HTMLImageElement>
 
   constructor() {
@@ -64,3 +64,36 @@ class AssetLoader {
 }
 
 const assets = new AssetLoader()
+
+class EventDispatcher {
+  _eventListeners: {}
+
+  constructor() {
+    this._eventListeners = {}
+  }
+
+  addEventListener(type, callback) {
+    if (this._eventListeners[type] === undefined) {
+      this._eventListeners[type] = []
+    }
+
+    this._eventListeners[type].push(callback)
+  }
+
+  removeAllEventListener() {
+    this._eventListeners = {}
+  }
+
+  dispatchEvent(type, event) {
+    const listeners = this._eventListeners[type]
+    if (listeners !== undefined) listeners.forEach(callback => callback(event))
+  }
+}
+
+class GameEvent {
+  _target: {}
+
+  constructor(target) {
+    this._target = target
+  }
+}
