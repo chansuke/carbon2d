@@ -333,3 +333,19 @@ class Scene extends EventDispatcher {
     this._destroyedActors = []
   }
 }
+
+class GameInfo {
+  title: string
+  description: string
+  screenRectangle: number
+  maxFps: number
+  currentFps: number
+
+  constructor(title, description, screenRectangle, maxFps, currentFps) {
+    this.title = title
+    this.description = description
+    this.screenRectangle = screenRectangle
+    this.maxFps = maxFps
+    this.currentFps = currentFps
+  }
+}
