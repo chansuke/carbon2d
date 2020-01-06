@@ -349,3 +349,64 @@ class GameInfo {
     this.currentFps = currentFps
   }
 }
+
+class Game {
+  title: string
+  description: string
+  width: number
+  height: number
+  maxFps: number
+  currentFps: number
+  _inputReceiver: any
+  _prevTimestamp: number
+  currentScene: any
+
+  constructor(title, description, width, height, maxFps) {
+    this.title = title
+    this.description = description
+    this.width = width
+    this.height = height
+    this.maxFps = maxFps
+    this.currentFps = 0
+
+    this._inputReceiver = new InputReceiver()
+    this._prevTimestamp = 0
+  }
+
+  changeScene(newScene) {
+    this.currentScene = newScene
+    this.currentScene.addEventListener('changescene', e =>
+      this.changeScene(e.target)
+    )
+  }
+
+  start() {
+    requestAnimationFrame(this._loop.bind(this))
+  }
+
+  _loop = timestamp => {
+    const elapsedSec = (timestamp - this._prevTimestamp) / 1000
+    const accuracy = 0.9
+    const frameTime = (1 / this.maxFps) * accuracy
+    if (elapsedSec <= frameTime) {
+      requestAnimationFrame(this._loop.bind(this))
+      return
+    }
+
+    this._prevTimestamp = timestamp
+    this.currentFps = 1 / elapsedSec
+
+    const screenRectangle = new Rectangle(0, 0, this.width, this.height)
+    const info = new GameInfo(
+      this.title,
+      this.description,
+      screenRectangle,
+      this.maxFps,
+      this.currentFps
+    )
+    const input = this._inputReceiver.getInput()
+    this.currentScene.update(info, input)
+
+    requestAnimationFrame(this._loop.bind(this))
+  }
+}
