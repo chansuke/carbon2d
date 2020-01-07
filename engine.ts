@@ -357,7 +357,7 @@ class Game {
   height: number
   maxFps: number
   currentFps: number
-  _inputReceiver: any
+  _inputReceiver: InputReceiver
   _prevTimestamp: number
   currentScene: any
 
