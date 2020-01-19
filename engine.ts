@@ -99,8 +99,8 @@ class GameEvent {
 }
 
 class Actor extends EventDispatcher {
-  hitArea: { x: number; y: number }
-  _hitAreaOffsetX: number // not `Number`
+  hitArea: Rectangle
+  _hitAreaOffsetX: number
   _hitAreaOffsetY: number
   tags: string[]
   _x: number
@@ -254,7 +254,7 @@ class InputReceiver {
 class Scene extends EventDispatcher {
   name: string
   backgroundColor: string
-  actors: Array<{ update: any; hitArea: any; dispatchEvent: any; render: any }>
+  actors: Actor[]
   renderingTarget: HTMLCanvasElement
   _destroyedActors: string[]
 
@@ -303,7 +303,7 @@ class Scene extends EventDispatcher {
       for (let j = i + 1; j < length; j++) {
         const obj1 = this.actors[i]
         const obj2 = this.actors[j]
-        const hit = obj1.hitArea.hitTest(obj2.hitArea)
+        const hit = obj1.hitArea[0].hitTest(obj2.hitArea)
         if (hit) {
           obj1.dispatchEvent('hit', new GameEvent(obj2))
           obj2.dispatchEvent('hit', new GameEvent(obj1))
@@ -347,5 +347,66 @@ class GameInfo {
     this.screenRectangle = screenRectangle
     this.maxFps = maxFps
     this.currentFps = currentFps
+  }
+}
+
+class Game {
+  title: string
+  description: string
+  width: number
+  height: number
+  maxFps: number
+  currentFps: number
+  _inputReceiver: InputReceiver
+  _prevTimestamp: number
+  currentScene: Scene
+
+  constructor(title, description, width, height, maxFps) {
+    this.title = title
+    this.description = description
+    this.width = width
+    this.height = height
+    this.maxFps = maxFps
+    this.currentFps = 0
+
+    this._inputReceiver = new InputReceiver()
+    this._prevTimestamp = 0
+  }
+
+  changeScene(newScene) {
+    this.currentScene = newScene
+    this.currentScene.addEventListener('changescene', e =>
+      this.changeScene(e.target)
+    )
+  }
+
+  start() {
+    requestAnimationFrame(this._loop.bind(this))
+  }
+
+  _loop = timestamp => {
+    const elapsedSec = (timestamp - this._prevTimestamp) / 1000
+    const accuracy = 0.9
+    const frameTime = (1 / this.maxFps) * accuracy
+    if (elapsedSec <= frameTime) {
+      requestAnimationFrame(this._loop.bind(this))
+      return
+    }
+
+    this._prevTimestamp = timestamp
+    this.currentFps = 1 / elapsedSec
+
+    const screenRectangle = new Rectangle(0, 0, this.width, this.height)
+    const info = new GameInfo(
+      this.title,
+      this.description,
+      screenRectangle,
+      this.maxFps,
+      this.currentFps
+    )
+    const input = this._inputReceiver.getInput()
+    this.currentScene.update(info, input)
+
+    requestAnimationFrame(this._loop.bind(this))
   }
 }
